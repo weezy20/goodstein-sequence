@@ -12,6 +12,16 @@ pub struct Base<const K: u32> {
     // Set true if the maximum exponent produced is equal to or less than K
     pub reduced: bool,
 }
+impl<const K:u32> Base<K> {
+    fn compute(&self) -> u32 {
+        self.exponents.iter().fold(0, |acc, e| {
+            // TODO: We need both `Multiplier` and `Power` in our exponents list for computing a `Base<K>`.
+            // Therefore it would be better to change exponents from `Vec<Base<K>>` to a `Vec<(Multiplier, Power)>`
+            // And `Multiplier(u32)` to `Multiplier(Base<K>)` and the same for `Power` respectively.
+            todo!()
+        })
+    }
+}
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 struct Multiplier(u32);
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -34,7 +44,6 @@ impl<const K: u32> From<u32> for Base<K> {
         //                         (multiplier, power)
         let mut exponent_list: Vec<(Multiplier, Power)> = vec![];
         let mut div = n;
-        let mut initial_power = 0;
         loop {
             // Stackoverflow if true as we need a limiting case for Base<K> calling from indefinitely
             if div == 0 {
@@ -46,14 +55,19 @@ impl<const K: u32> From<u32> for Base<K> {
                 break exponent_list.push((Multiplier(1), Power(0)));
             }
             // Check if number is a power of K itself
-            if let Some(power) = is_power_of(div, K) {
-                break exponent_list.push((Multiplier(1), Power(power)));
+            if let Some((perfect_power, power)) = is_power_of(div, K) {
+                if perfect_power {
+                    break exponent_list.push((Multiplier(1), Power(power)));
+                } else {
+                    let multiplier = div / power;
+                    exponent_list.push((Multiplier(multiplier), Power(power)));
+                    div /= power;
+                    continue;
+                }
+            } else {
+                println!("Forbidden condtional reached lmao");
+                break;
             }
-            exponent_list.push((
-                Multiplier(todo!("Find appropriate multipler and power")),
-                Power(todo!("Find appropriate multipler and power")),
-            ));
-            div /= K;
         }
         let exponents = exponent_list
             .into_iter()
@@ -74,7 +88,27 @@ impl<const K: u32> From<u32> for Base<K> {
     }
 }
 
-/// Returns Some(exponent) if `number` is a power of a given base `power_of`
-pub fn is_power_of(number: u32, power_of: u32) -> Option<u32> {
-    None
+/// Returns Some(true, exponent) if `number` is a perfect power of a given `base`
+/// else Some(false, exponent) where `number - base.pow(exponent) < base`
+/// None is returned if `number < base`
+pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
+    if number < base {
+        return None;
+    }
+    let initial_guess: u32 = 1;
+    let mut guess = initial_guess;
+    loop {
+        let chunk = base.pow(guess);
+        if number > chunk && number - chunk > base {
+            guess += 1;
+        } else if number > chunk && number - chunk < base {
+            return Some((false, guess));
+        }
+        if number < chunk && number - chunk > base {
+            return Some((false, guess - 1));
+        }
+        if number == chunk {
+            return Some((true, guess));
+        }
+    }
 }
