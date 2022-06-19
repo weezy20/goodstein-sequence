@@ -4,21 +4,25 @@
 mod tests;
 #[derive(Debug, Default, Clone)]
 /// Hereditary base K notation
+/// Any number `N` can be represented as a `Sum(A_i.K^i)`
 pub struct Base<const K: u32> {
     // The actual number being stored
     pub number: u32,
     // Given exponents and a base K, any number can be expressed,
-    pub exponents: Vec<Base<K>>,
+    pub exponents: Vec<(Multiplier, Power)>,
     // Set true if the maximum exponent produced is equal to or less than K
     pub reduced: bool,
 }
 impl<const K:u32> Base<K> {
     pub fn compute(&self) -> u32 {
+        if self.reduced {
+            return self.number;
+        }
         self.exponents.iter().fold(0, |acc, e| {
             // TODO: We need both `Multiplier` and `Power` in our exponents list for computing a `Base<K>`.
             // Therefore it would be better to change exponents from `Vec<Base<K>>` to a `Vec<(Multiplier, Power)>`
             // And `Multiplier(u32)` to `Multiplier(Base<K>)` and the same for `Power` respectively.
-            todo!()
+            
         })
     }
 }
@@ -70,12 +74,14 @@ impl<const K: u32> From<u32> for Base<K> {
         }
         let exponents = exponent_list
             .into_iter()
-            .map(|(_multi, power)| Base::<K>::from(power.0))
-            .collect::<Vec<Base<K>>>();
+            .map(|(multi, power)| (multi, power))
+            .collect::<Vec<_>>();
         if exponents.len() == 1
             && exponents
                 .iter()
-                .any(|exp| exp.number == 1 || exp.number == 0)
+                .any(|&exp| match exp.1 {
+                    Power(x) if x <= K => true, _ => false
+                })
         {
             reduced = true;
         }
