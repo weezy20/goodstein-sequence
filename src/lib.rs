@@ -13,7 +13,7 @@ pub struct Base<const K: u32> {
     pub reduced: bool,
 }
 impl<const K:u32> Base<K> {
-    fn compute(&self) -> u32 {
+    pub fn compute(&self) -> u32 {
         self.exponents.iter().fold(0, |acc, e| {
             // TODO: We need both `Multiplier` and `Power` in our exponents list for computing a `Base<K>`.
             // Therefore it would be better to change exponents from `Vec<Base<K>>` to a `Vec<(Multiplier, Power)>`
@@ -65,8 +65,7 @@ impl<const K: u32> From<u32> for Base<K> {
                     continue;
                 }
             } else {
-                println!("Forbidden condtional reached lmao");
-                break;
+                break exponent_list.push((Multiplier(div), Power(0)));
             }
         }
         let exponents = exponent_list
