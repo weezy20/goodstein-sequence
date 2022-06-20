@@ -49,7 +49,7 @@ impl<const K: u32> Into<u32> for Base<K> {
 impl<const K: u32> From<u32> for Base<K> {
     // Given any number `n` in base-10 to return a base-k representation of it.
     fn from(n: u32) -> Self {
-        assert!(K > 2, "Bases less than 2 do not make sense");
+        assert!(K >= 2, "Bases less than 2 do not make sense");
         let mut reduced = false;
         //                         (multiplier, power)
         let mut exponent_list: Vec<(Multiplier, Power)> = vec![];
