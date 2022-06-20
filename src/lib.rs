@@ -1,5 +1,7 @@
 //! Base<K> is our implementation for a hereditary base notation to be used in computing Goodstein sequences
 #![allow(non_snake_case)]
+
+use std::sync::Mutex;
 #[cfg(test)]
 mod tests;
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -57,7 +59,7 @@ impl<const K: u32> From<u32> for Base<K> {
                 break reduced = true;
             }
             if div / K == 1 {
-                if div % K == 0 {
+                if div == K {
                     break exponent_list.push((Multiplier(1), Power(1)));
                 } else {
                     exponent_list.push((Multiplier(1), Power(1)));
@@ -65,7 +67,9 @@ impl<const K: u32> From<u32> for Base<K> {
                     break exponent_list.push((Multiplier(ones), Power(0)));
                 }
             } else if div / K < 1 {
-                break exponent_list.push((Multiplier(1), Power(0)));
+                let ones = div;
+                exponent_list.push((Multiplier(0), Power(1)));
+                break exponent_list.push((Multiplier(ones), Power(0)));
             }
             // Check if number is a power of K itself
             if let Some((perfect_power, power)) = is_power_of(div, K) {
@@ -75,8 +79,7 @@ impl<const K: u32> From<u32> for Base<K> {
                 } else {
                     let multiplier = div / K.pow(power);
                     exponent_list.push((Multiplier(multiplier), Power(power)));
-                    div /= power;
-                    println!("Value of div : {div}");
+                    div -= multiplier*K.pow(power);
                     continue 'expand;
                 }
             } else {

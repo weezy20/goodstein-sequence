@@ -1,5 +1,4 @@
 use super::*;
-#[ignore = "still some faults present in from function"]
 #[test]
 fn check_base3() {
     let three = Base::<3>::from(11);
@@ -26,7 +25,7 @@ fn check_base2() {
         },
         eleven_two
     );
-    println!("{:?}", eleven_two);
+    // println!("{:?}", eleven_two);
     let eleven_into = Into::<u32>::into(eleven_two);
     assert_eq!(eleven_into, 11);
 }
@@ -43,4 +42,8 @@ fn check_base2() {
 fn is_power_of_test() {
     let res = is_power_of(3, 2);
     assert_eq!(res, Some((false, 1)));
+    let res = is_power_of(11, 3);
+    assert_eq!(res, Some((false, 2)));
+    let res = is_power_of(2, 3);
+    assert_eq!(res, None);
 }
