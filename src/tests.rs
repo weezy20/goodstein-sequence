@@ -30,14 +30,14 @@ fn check_base2() {
     assert_eq!(eleven_into, 11);
 }
 // #[ignore = "base 2 infinite loop"]
-// #[test]
-// fn check_compute() {
-//     let eleven_two = Base::<2>::from(11); // loop never terminates
-//     let eleven_three = Base::<3>::from(11);
-//     println!("Base 2 -------> {eleven_two:?}");
-//     println!("Base 3 -------> {eleven_three:?}");
-//     assert_eq!(eleven_two.compute(), eleven_three.compute());
-// }
+#[test]
+fn check_compute() {
+    let eleven_two = Base::<2>::from(11); // loop never terminates
+    let eleven_three = Base::<3>::from(11);
+    println!("Base 2 -------> {eleven_two:?}");
+    println!("Base 3 -------> {eleven_three:?}");
+    assert_eq!(eleven_two.compute(), eleven_three.compute());
+}
 #[test]
 fn is_power_of_test() {
     let res = is_power_of(3, 2);
