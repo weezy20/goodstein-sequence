@@ -2,7 +2,11 @@
 #![allow(non_snake_case)]
 #[cfg(test)]
 mod tests;
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
+pub struct Multiplier(u32);
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
+pub struct Power(u32);
+#[derive(Debug, Default, Clone, PartialEq)]
 /// Hereditary base K notation
 /// Any number `N` can be represented as a `Sum(A_i.K^i)`
 pub struct Base<const K: u32> {
@@ -13,23 +17,17 @@ pub struct Base<const K: u32> {
     // Set true if the maximum exponent produced is equal to or less than K
     pub reduced: bool,
 }
-impl<const K:u32> Base<K> {
+impl<const K: u32> Base<K> {
+    /// Build a number from exponent list
     pub fn compute(&self) -> u32 {
-        if self.reduced {
-            return self.number;
-        }
-        self.exponents.iter().fold(0, |acc, e| {
-            // TODO: We need both `Multiplier` and `Power` in our exponents list for computing a `Base<K>`.
-            // Therefore it would be better to change exponents from `Vec<Base<K>>` to a `Vec<(Multiplier, Power)>`
-            // And `Multiplier(u32)` to `Multiplier(Base<K>)` and the same for `Power` respectively.
-            
-        })
+        let s: u32 = self
+            .exponents
+            .iter()
+            .fold(0, |acc, &x| acc + x.0 .0 * K.pow(x.1 .0));
+        assert_eq!(s, self.number);
+        s
     }
 }
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
-struct Multiplier(u32);
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
-struct Power(u32);
 
 // Tuple struct constructors are first-class functions, like variant constructors.
 // So the declaration of a tuple struct injects a value into the value namespace. The variable in an expression like x() looks for a name in the value namespace.
@@ -41,6 +39,11 @@ struct Power(u32);
 // pub type P = Power;
 // M(1) or P(2) won't work
 
+impl<const K: u32> Into<u32> for Base<K> {
+    fn into(self) -> u32 {
+        self.number
+    }
+}
 impl<const K: u32> From<u32> for Base<K> {
     // Given any number `n` in base-10 to return a base-k representation of it.
     fn from(n: u32) -> Self {
@@ -48,25 +51,33 @@ impl<const K: u32> From<u32> for Base<K> {
         //                         (multiplier, power)
         let mut exponent_list: Vec<(Multiplier, Power)> = vec![];
         let mut div = n;
-        loop {
+        'expand: loop {
             // Stackoverflow if true as we need a limiting case for Base<K> calling from indefinitely
             if div == 0 {
                 break reduced = true;
             }
             if div / K == 1 {
-                break exponent_list.push((Multiplier(1), Power(1)));
+                if div % K == 0 {
+                    break exponent_list.push((Multiplier(1), Power(1)));
+                } else {
+                    exponent_list.push((Multiplier(1), Power(1)));
+                    let ones = div - K;
+                    break exponent_list.push((Multiplier(ones), Power(0)));
+                }
             } else if div / K < 1 {
                 break exponent_list.push((Multiplier(1), Power(0)));
             }
             // Check if number is a power of K itself
             if let Some((perfect_power, power)) = is_power_of(div, K) {
+                println!("Exectued is_power_of({div}, {K})");
                 if perfect_power {
                     break exponent_list.push((Multiplier(1), Power(power)));
                 } else {
-                    let multiplier = div / power;
+                    let multiplier = div / K.pow(power);
                     exponent_list.push((Multiplier(multiplier), Power(power)));
                     div /= power;
-                    continue;
+                    println!("Value of div : {div}");
+                    continue 'expand;
                 }
             } else {
                 break exponent_list.push((Multiplier(div), Power(0)));
@@ -77,11 +88,10 @@ impl<const K: u32> From<u32> for Base<K> {
             .map(|(multi, power)| (multi, power))
             .collect::<Vec<_>>();
         if exponents.len() == 1
-            && exponents
-                .iter()
-                .any(|&exp| match exp.1 {
-                    Power(x) if x <= K => true, _ => false
-                })
+            && exponents.iter().any(|&exp| match exp.1 {
+                Power(x) if x <= K => true,
+                _ => false,
+            })
         {
             reduced = true;
         }
@@ -104,12 +114,14 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
     let mut guess = initial_guess;
     loop {
         let chunk = base.pow(guess);
-        if number > chunk && number - chunk > base {
-            guess += 1;
-        } else if number > chunk && number - chunk < base {
-            return Some((false, guess));
+        if number > chunk {
+            if number > chunk * base {
+                guess += 1;
+            } else {
+                return Some((false, guess));
+            }
         }
-        if number < chunk && number - chunk > base {
+        if number < chunk  {
             return Some((false, guess - 1));
         }
         if number == chunk {
