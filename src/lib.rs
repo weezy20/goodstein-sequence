@@ -1,7 +1,5 @@
 //! Base<K> is our implementation for a hereditary base notation to be used in computing Goodstein sequences
-#![allow(non_snake_case)]
-
-use std::sync::Mutex;
+use std::fmt::Display;
 #[cfg(test)]
 mod tests;
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -41,6 +39,8 @@ impl<const K: u32> Base<K> {
 // pub type P = Power;
 // M(1) or P(2) won't work
 
+// Note: confusingly these are not overlapping From and Into trait impls, ie :)
+// From<A> for B implies Into<B> for A, but not Into<A> for B
 impl<const K: u32> Into<u32> for Base<K> {
     fn into(self) -> u32 {
         self.number
@@ -69,8 +69,15 @@ impl<const K: u32> From<u32> for Base<K> {
                 }
             } else if div / K < 1 {
                 let ones = div;
-                exponent_list.push((Multiplier(0), Power(1)));
-                break exponent_list.push((Multiplier(ones), Power(0)));
+                if div != n {
+                    // This condition is entered only when n < K, not div < K which is reduced incrementally
+                    // For n < K (not div), we shouldn't include this unnecessarily 
+                    exponent_list.push((Multiplier(0), Power(1)));
+                }
+                if ones >= 1 {
+                    exponent_list.push((Multiplier(ones), Power(0)));
+                }
+                break;
             }
             // Check if number is a power of K itself
             if let Some((perfect_power, power)) = is_power_of(div, K) {
@@ -79,7 +86,7 @@ impl<const K: u32> From<u32> for Base<K> {
                 } else {
                     let multiplier = div / K.pow(power);
                     exponent_list.push((Multiplier(multiplier), Power(power)));
-                    div -= multiplier*K.pow(power);
+                    div -= multiplier * K.pow(power);
                     continue 'expand;
                 }
             } else {
@@ -124,7 +131,7 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
                 return Some((false, guess));
             }
         }
-        if number < chunk  {
+        if number < chunk {
             return Some((false, guess - 1));
         }
         if number == chunk {
@@ -132,3 +139,11 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
         }
     }
 }
+
+// TODO:
+// impl<const K: u32> Display for Base<K> {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         let vec = self.exponents.iter().map(|(m, p)| m.0.to_string() ).collect();
+//         writeln!(f, format!(""))
+//     }
+// }
