@@ -72,7 +72,7 @@ impl<const K: u32> From<u32> for Base<K> {
                 if div != n {
                     // This condition is entered only when n < K, not div < K which is reduced incrementally
                     // For n < K (not div), we shouldn't include this unnecessarily 
-                    exponent_list.push((Multiplier(0), Power(1)));
+                    // exponent_list.push((Multiplier(0), Power(1)));
                 }
                 if ones >= 1 {
                     exponent_list.push((Multiplier(ones), Power(0)));
