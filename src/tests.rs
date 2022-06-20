@@ -5,7 +5,11 @@ fn check_base3() {
     assert_eq!(
         Base {
             number: 11,
-            exponents: vec![(Multiplier(1), Power(2)), (Multiplier(0), Power(1)), (Multiplier(2), Power(0))],
+            exponents: vec![
+                (Multiplier(1), Power(2)),
+                (Multiplier(0), Power(1)),
+                (Multiplier(2), Power(0))
+            ],
             reduced: false
         },
         three
@@ -20,7 +24,11 @@ fn check_base2() {
     assert_eq!(
         Base {
             number: 11, // 1011_base2
-            exponents: vec![(Multiplier(1), Power(3)), (Multiplier(1), Power(1)), (Multiplier(1), Power(0))],
+            exponents: vec![
+                (Multiplier(1), Power(3)),
+                (Multiplier(1), Power(1)),
+                (Multiplier(1), Power(0))
+            ],
             reduced: false
         },
         eleven_two
@@ -32,11 +40,14 @@ fn check_base2() {
 // #[ignore = "base 2 infinite loop"]
 #[test]
 fn check_compute() {
-    let eleven_two = Base::<2>::from(11); // loop never terminates
+    let eleven_two = Base::<2>::from(11);
     let eleven_three = Base::<3>::from(11);
+    let eleven_four = Base::<4>::from(11);
     println!("Base 2 -------> {eleven_two:?}");
     println!("Base 3 -------> {eleven_three:?}");
+    println!("Base 4 -------> {eleven_four:?}");
     assert_eq!(eleven_two.compute(), eleven_three.compute());
+    assert_eq!(eleven_two.compute(), eleven_four.compute());
 }
 #[test]
 fn is_power_of_test() {
