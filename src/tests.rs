@@ -11,7 +11,7 @@ fn check_octal() {
             number: 18,
             exponents: vec![
                 (Multiplier(2), Power(1)),
-                (Multiplier(0), Power(1)), // This should not be here
+                // (Multiplier(0), Power(1)), // This should not be here
                 (Multiplier(2), Power(0))
             ],
             reduced: false
