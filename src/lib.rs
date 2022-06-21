@@ -162,14 +162,26 @@ impl<const K: u32> Display for Base<K> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut result = Vec::new();
         let digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
-        self.exponents
+        let &(_, Power(max_power)) = self
+            .exponents
             .iter()
-            .enumerate()
-            .map(|(i, (m, p))| (m.0, p.0))
-            .for_each(|(m, _p)| {
-                let index = m as usize;
-                result.push(digits[index]);
-            });
+            .max_by_key(|x| x.1 .0)
+            .expect("We always have at least one exponent in the list");
+        for i in (0..=max_power).rev() {
+            if let Some((m, p)) = self.exponents.iter().find(|(m, p)| p.0 == i) {
+                result.push(digits[m.0 as usize]);
+            } else {
+                result.push(digits[0]);
+            }
+        }
+
+        // self.exponents
+        //     .iter()
+        //     .map(|(m, p)| (m.0, p.0))
+        //     .for_each(|(m, _p)| {
+        //         let index = m as usize;
+        //         result.push(digits[index]);
+        //     });
         // let final_result: String = result.into_iter().collect();
         // write!(f, "{}", &final_result)
         for c in result {
