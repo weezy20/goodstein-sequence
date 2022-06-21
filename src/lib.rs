@@ -47,6 +47,7 @@ impl<const K: u32> Into<u32> for Base<K> {
         self.number
     }
 }
+// TODO: Scrutinize 'reduced' logic
 impl<const K: u32> From<u32> for Base<K> {
     // Given any number `n` in base-10 to return a base-k representation of it.
     fn from(n: u32) -> Self {
@@ -58,6 +59,15 @@ impl<const K: u32> From<u32> for Base<K> {
         let mut reduced = false;
         //                         (multiplier, power)
         let mut exponent_list: Vec<(Multiplier, Power)> = vec![];
+        if n == 0 {
+            exponent_list.push((Multiplier(0), Power(0)));
+            reduced = !reduced;
+            return Base {
+                exponents: exponent_list,
+                reduced,
+                number: n,
+            };
+        }
         let mut div = n;
         'expand: loop {
             // Stackoverflow if true as we need a limiting case for Base<K> calling from indefinitely
@@ -77,7 +87,7 @@ impl<const K: u32> From<u32> for Base<K> {
                 if div != n {
                     // This condition is entered only when n < K, not div < K which is reduced incrementally
                     // For n < K (not div), we shouldn't include this unnecessarily
-                    if let Some(_) = exponent_list.iter().find(|x| x.1.0 != 1) {
+                    if let Some(_) = exponent_list.iter().find(|x| x.1 .0 != 1) {
                         exponent_list.push((Multiplier(0), Power(1)));
                     }
                 }
@@ -148,19 +158,23 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
 }
 
 // TODO:
-// impl<const K: u32> Display for Base<K> {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         let &(_, Power(max_power)) = self
-//             .exponents
-//             .iter()
-//             .max_by_key(|&&x| x.1 .0)
-//             .expect("Cannot be none");
-//         let mut result: String = String::with_capacity(max_power as usize);
-//         const digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
-//         for i in 0..=max_power {
-//             // This loop maybe larger than exponents list because we can skip 0 multipliers while constructing Base<K>
-
-//         }
-//         writeln!(f, format!(""))
-//     }
-// }
+impl<const K: u32> Display for Base<K> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut result = Vec::new();
+        let digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
+        self.exponents
+            .iter()
+            .enumerate()
+            .map(|(i, (m, p))| (m.0, p.0))
+            .for_each(|(m, _p)| {
+                let index = m as usize;
+                result.push(digits[index]);
+            });
+        // let final_result: String = result.into_iter().collect();
+        // write!(f, "{}", &final_result)
+        for c in result {
+            c.fmt(f)?;
+        }
+        Ok(())
+    }
+}

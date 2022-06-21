@@ -1,5 +1,16 @@
 use super::*;
 #[test]
+fn check_display_impl() {
+    use radix_fmt::radix;
+    const K: u32 = 8;
+    for i in 1..1000_000_999_u32 {
+        let r = radix(i, K as u8);
+        let b = Base::<K>::from(i);
+        println!("Radix: {r} Base<K>: {b:?}");
+        assert_eq!(r.to_string(), b.to_string());
+    }
+}
+#[test]
 fn check_octal() {
     // let seven = Base::<8>::from(7);
     // Since 7 cannot be further reduced in Base-8
@@ -31,6 +42,24 @@ fn check_octal() {
         },
         _69
     );
+    let _10 = Base::<8>::from(10);
+    assert_eq!(
+        Base {
+            number: 10,
+            exponents: vec![(Multiplier(1), Power(1)), (Multiplier(2), Power(0))],
+            reduced: false
+        },
+        _10
+    );
+    let _8 = Base::<8>::from(8);
+    assert_eq!(
+        Base {
+            number: 8,
+            exponents: vec![(Multiplier(1), Power(1)), (Multiplier(0), Power(0))], // we might have to consider rewriting our library
+            reduced: true
+        },
+        _8
+    );
 }
 #[test]
 fn check_base3() {
@@ -38,10 +67,7 @@ fn check_base3() {
     assert_eq!(
         Base {
             number: 11,
-            exponents: vec![
-                (Multiplier(1), Power(2)),
-                (Multiplier(2), Power(0))
-            ],
+            exponents: vec![(Multiplier(1), Power(2)), (Multiplier(2), Power(0))],
             reduced: false
         },
         three
