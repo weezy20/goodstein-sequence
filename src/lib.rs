@@ -1,5 +1,6 @@
 //! Base<K> is our implementation for a hereditary base notation to be used in computing Goodstein sequences
 use std::fmt::Display;
+static DIGITS: &'static str = "0123456789abcdefghijklmnopqrstuvwxyz";
 #[cfg(test)]
 mod tests;
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -50,6 +51,10 @@ impl<const K: u32> From<u32> for Base<K> {
     // Given any number `n` in base-10 to return a base-k representation of it.
     fn from(n: u32) -> Self {
         assert!(K >= 2, "Bases less than 2 do not make sense");
+        assert!(
+            K <= (26 + 10),
+            "We run out of ascii symbols to represent more than base 36 digits"
+        );
         let mut reduced = false;
         //                         (multiplier, power)
         let mut exponent_list: Vec<(Multiplier, Power)> = vec![];
@@ -71,8 +76,10 @@ impl<const K: u32> From<u32> for Base<K> {
                 let ones = div;
                 if div != n {
                     // This condition is entered only when n < K, not div < K which is reduced incrementally
-                    // For n < K (not div), we shouldn't include this unnecessarily 
-                    // exponent_list.push((Multiplier(0), Power(1)));
+                    // For n < K (not div), we shouldn't include this unnecessarily
+                    if let Some(_) = exponent_list.iter().find(|x| x.1.0 != 1) {
+                        exponent_list.push((Multiplier(0), Power(1)));
+                    }
                 }
                 if ones >= 1 {
                     exponent_list.push((Multiplier(ones), Power(0)));
@@ -143,7 +150,17 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
 // TODO:
 // impl<const K: u32> Display for Base<K> {
 //     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         let vec = self.exponents.iter().map(|(m, p)| m.0.to_string() ).collect();
+//         let &(_, Power(max_power)) = self
+//             .exponents
+//             .iter()
+//             .max_by_key(|&&x| x.1 .0)
+//             .expect("Cannot be none");
+//         let mut result: String = String::with_capacity(max_power as usize);
+//         const digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
+//         for i in 0..=max_power {
+//             // This loop maybe larger than exponents list because we can skip 0 multipliers while constructing Base<K>
+
+//         }
 //         writeln!(f, format!(""))
 //     }
 // }

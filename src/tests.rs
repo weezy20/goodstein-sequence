@@ -18,6 +18,19 @@ fn check_octal() {
         },
         eighteen
     );
+    let _69 = Base::<8>::from(69); // 105 in base8
+    assert_eq!(
+        Base {
+            number: 69,
+            exponents: vec![
+                (Multiplier(1), Power(2)),
+                (Multiplier(0), Power(1)), // This should be here but our previous rule cuts this out so we fixed that in line 80
+                (Multiplier(5), Power(0))
+            ],
+            reduced: false
+        },
+        _69
+    );
 }
 #[test]
 fn check_base3() {
@@ -67,6 +80,7 @@ fn check_compute() {
     // println!("Base 4 -------> {eleven_four:?}");
     assert_eq!(eleven_two.compute(), eleven_three.compute());
     assert_eq!(eleven_two.compute(), eleven_four.compute());
+    assert_eq!(eleven_two.compute(), eleven_four.number);
 }
 #[test]
 fn is_power_of_test() {
