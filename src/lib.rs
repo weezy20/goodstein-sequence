@@ -1,5 +1,5 @@
 //! Base<K> is our implementation for a hereditary base notation to be used in computing Goodstein sequences
-use std::fmt::Display;
+use std::{fmt::Display, ops::Mul};
 static DIGITS: &'static str = "0123456789abcdefghijklmnopqrstuvwxyz";
 #[cfg(test)]
 mod tests;
@@ -68,64 +68,43 @@ impl<const K: u32> From<u32> for Base<K> {
                 number: n,
             };
         }
-        let mut div = n;
-        'expand: loop {
-            // Stackoverflow if true as we need a limiting case for Base<K> calling from indefinitely
-            if div == 0 {
-                break reduced = true;
-            }
-            if div / K == 1 {
-                if div == K {
-                    break exponent_list.push((Multiplier(1), Power(1)));
-                } else {
-                    exponent_list.push((Multiplier(1), Power(1)));
-                    let ones = div - K;
-                    break exponent_list.push((Multiplier(ones), Power(0)));
-                }
-            } else if div / K < 1 {
-                let ones = div;
-                if div != n {
-                    // This condition is entered only when n < K, not div < K which is reduced incrementally
-                    // For n < K (not div), we shouldn't include this unnecessarily
-                    if let Some(_) = exponent_list.iter().find(|x| x.1 .0 != 1) {
-                        exponent_list.push((Multiplier(0), Power(1)));
+        match is_power_of(n, K) {
+            Some((true, p)) => exponent_list.push((Multiplier(1), Power(p))),
+            Some((false, p)) => {
+                let mut power_counter = p;
+                let mut div = n;
+                loop {
+                    // read this condition after loop body
+                    if div < K {
+                        while power_counter > 0 {
+                            // Fill intermediate spaces with 0s 
+                            exponent_list.push((Multiplier(0), Power(power_counter)));
+                            power_counter -= 1;
+                        }
+                        if div != 0 {
+                            break exponent_list.push((Multiplier(div), Power(0)));
+                        } else {
+                            // This optional else clause is here only for convinience sake when generating 
+                            // the display impl, as we can simply pick and place while iterating over the list
+                            // instead having to write a condition to check if the specific 0 multiplier Power(p) exists
+                            // in our list
+                            break exponent_list.push((Multiplier(0), Power(0)));
+                        }
                     }
+                    let mult = div / K.pow(power_counter);
+                    let rem = div % K.pow(power_counter);
+                    let entry = (Multiplier(mult), Power(power_counter));
+                    exponent_list.push(entry);
+                    power_counter -= 1;
+                    div = rem;
                 }
-                if ones >= 1 {
-                    exponent_list.push((Multiplier(ones), Power(0)));
-                }
-                break;
-            }
-            // Check if number is a power of K itself
-            if let Some((perfect_power, power)) = is_power_of(div, K) {
-                if perfect_power {
-                    break exponent_list.push((Multiplier(1), Power(power)));
-                } else {
-                    let multiplier = div / K.pow(power);
-                    exponent_list.push((Multiplier(multiplier), Power(power)));
-                    div -= multiplier * K.pow(power);
-                    continue 'expand;
-                }
-            } else {
-                break exponent_list.push((Multiplier(div), Power(0)));
-            }
-        }
-        let exponents = exponent_list
-            .into_iter()
-            .map(|(multi, power)| (multi, power))
-            .collect::<Vec<_>>();
-        if exponents.len() == 1
-            && exponents.iter().any(|&exp| match exp.1 {
-                Power(x) if x <= K => true,
-                _ => false,
-            })
-        {
-            reduced = true;
+            },
+            None => exponent_list.push((Multiplier(n), Power(0))),
         }
         Base {
-            number: n,
-            exponents,
+            exponents: exponent_list,
             reduced,
+            number: n,
         }
     }
 }
@@ -141,52 +120,52 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
     let mut guess = initial_guess;
     loop {
         let chunk = base.pow(guess);
-        if number > chunk {
-            if number > chunk * base {
+        if number == chunk {
+            return Some((true, guess));
+        }
+        else if number > chunk {
+            if number >= chunk * base {
                 guess += 1;
             } else {
                 return Some((false, guess));
             }
         }
-        if number < chunk {
+        else if number < chunk {
             return Some((false, guess - 1));
-        }
-        if number == chunk {
-            return Some((true, guess));
         }
     }
 }
 
 // TODO:
-impl<const K: u32> Display for Base<K> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut result = Vec::new();
-        let digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
-        let &(_, Power(max_power)) = self
-            .exponents
-            .iter()
-            .max_by_key(|x| x.1 .0)
-            .expect("We always have at least one exponent in the list");
-        for i in (0..=max_power).rev() {
-            if let Some((m, p)) = self.exponents.iter().find(|(m, p)| p.0 == i) {
-                result.push(digits[m.0 as usize]);
-            } else {
-                result.push(digits[0]);
-            }
-        }
+// impl<const K: u32> Display for Base<K> {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         let mut result = Vec::new();
+//         let digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
+//         let &(_, Power(max_power)) = self
+//             .exponents
+//             .iter()
+//             .max_by_key(|x| x.1 .0)
+//             .expect("We always have at least one exponent in the list");
+//         for i in (0..=max_power).rev() {
+//             if let Some((m, p)) = self.exponents.iter().find(|(m, p)| p.0 == i) {
+//                 result.push(digits[m.0 as usize]);
+//             } else {
+//                 result.push(digits[0]);
+//             }
+//         }
 
-        // self.exponents
-        //     .iter()
-        //     .map(|(m, p)| (m.0, p.0))
-        //     .for_each(|(m, _p)| {
-        //         let index = m as usize;
-        //         result.push(digits[index]);
-        //     });
-        // let final_result: String = result.into_iter().collect();
-        // write!(f, "{}", &final_result)
-        for c in result {
-            c.fmt(f)?;
-        }
-        Ok(())
-    }
-}
+//         // self.exponents
+//         //     .iter()
+//         //     .map(|(m, p)| (m.0, p.0))
+//         //     .for_each(|(m, _p)| {
+//         //         let index = m as usize;
+//         //         result.push(digits[index]);
+//         //     });
+//         // let final_result: String = result.into_iter().collect();
+//         // write!(f, "{}", &final_result)
+//         for c in result {
+//             c.fmt(f)?;
+//         }
+//         Ok(())
+//     }
+// }

@@ -14,9 +14,9 @@ fn main() {
     // println!("base2 {r2}", r2=format!("{r2}"));
     // println!("base3 {r3}");
     // let b = radix(25, 35);
-    // println!("{b}");
-    let r = radix(9,8);
-    println!("Radix : {}", r.to_string());
-    let b = Base::<8>::from(9);
-    println!("Base<K>: {b}");
+    // // println!("{b}");
+    // let r = radix(9,8);
+    // println!("Radix : {}", r.to_string());
+    // let b = Base::<8>::from(9);
+    // println!("Base<K>: {b}");
 }
