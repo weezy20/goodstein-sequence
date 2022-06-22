@@ -1,14 +1,13 @@
 use super::*;
-#[ignore = "Debugging display impl"]
 #[test]
 fn check_display_impl() {
     use radix_fmt::radix;
     const K: u32 = 8;
-    for i in 1..1000_000_999_u32 {
+    for i in 1..100_000_u32 {
         let r = radix(i, K as u8);
         let b = Base::<K>::from(i);
-        println!("Radix: {r} Base<K>: {b:?}");
-        // assert_eq!(r.to_string(), b.to_string());
+        // println!("Number: {i} Left/Radix: {r} Right/Base: {b}");
+        assert_eq!(r.to_string(), b.to_string());
     }
 }
 #[test]

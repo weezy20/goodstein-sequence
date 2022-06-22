@@ -77,14 +77,14 @@ impl<const K: u32> From<u32> for Base<K> {
                     // read this condition after loop body
                     if div < K {
                         while power_counter > 0 {
-                            // Fill intermediate spaces with 0s 
+                            // Fill intermediate spaces with 0s
                             exponent_list.push((Multiplier(0), Power(power_counter)));
                             power_counter -= 1;
                         }
                         if div != 0 {
                             break exponent_list.push((Multiplier(div), Power(0)));
                         } else {
-                            // This optional else clause is here only for convinience sake when generating 
+                            // This optional else clause is here only for convinience sake when generating
                             // the display impl, as we can simply pick and place while iterating over the list
                             // instead having to write a condition to check if the specific 0 multiplier Power(p) exists
                             // in our list
@@ -98,7 +98,7 @@ impl<const K: u32> From<u32> for Base<K> {
                     power_counter -= 1;
                     div = rem;
                 }
-            },
+            }
             None => exponent_list.push((Multiplier(n), Power(0))),
         }
         Base {
@@ -122,50 +122,34 @@ pub fn is_power_of(number: u32, base: u32) -> Option<(bool, u32)> {
         let chunk = base.pow(guess);
         if number == chunk {
             return Some((true, guess));
-        }
-        else if number > chunk {
+        } else if number > chunk {
             if number >= chunk * base {
                 guess += 1;
             } else {
                 return Some((false, guess));
             }
-        }
-        else if number < chunk {
+        } else if number < chunk {
             return Some((false, guess - 1));
         }
     }
 }
 
-// TODO:
-// impl<const K: u32> Display for Base<K> {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         let mut result = Vec::new();
-//         let digits: Vec<char> = DIGITS.chars().collect::<Vec<char>>();
-//         let &(_, Power(max_power)) = self
-//             .exponents
-//             .iter()
-//             .max_by_key(|x| x.1 .0)
-//             .expect("We always have at least one exponent in the list");
-//         for i in (0..=max_power).rev() {
-//             if let Some((m, p)) = self.exponents.iter().find(|(m, p)| p.0 == i) {
-//                 result.push(digits[m.0 as usize]);
-//             } else {
-//                 result.push(digits[0]);
-//             }
-//         }
-
-//         // self.exponents
-//         //     .iter()
-//         //     .map(|(m, p)| (m.0, p.0))
-//         //     .for_each(|(m, _p)| {
-//         //         let index = m as usize;
-//         //         result.push(digits[index]);
-//         //     });
-//         // let final_result: String = result.into_iter().collect();
-//         // write!(f, "{}", &final_result)
-//         for c in result {
-//             c.fmt(f)?;
-//         }
-//         Ok(())
-//     }
-// }
+impl<const K: u32> Display for Base<K> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut result: Vec<char> = vec![];
+        let digits = DIGITS.chars().collect::<Vec<char>>();
+        let mut power_counter = 0;
+        self.exponents.iter().for_each(|(m, p)| {
+            power_counter = p.0;
+            result.push(digits[m.0 as usize]);
+        });
+        while power_counter != 0 {
+            result.push(digits[0]);
+            power_counter -= 1;
+        }
+        for c in result {
+            c.fmt(f)?;
+        }
+        Ok(())
+    }
+}
