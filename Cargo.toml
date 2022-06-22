@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 easy_io = "0.3.0"
 radix_fmt = "1.0.0"
+[dev-dependencies]
+paste = "1.0"

@@ -1,14 +1,30 @@
 use super::*;
 #[test]
 fn check_display_impl() {
+    use paste::paste;
     use radix_fmt::radix;
-    const K: u32 = 8;
-    for i in 1..100_000_u32 {
-        let r = radix(i, K as u8);
-        let b = Base::<K>::from(i);
-        // println!("Number: {i} Left/Radix: {r} Right/Base: {b}");
-        assert_eq!(r.to_string(), b.to_string());
+    macro_rules! generate_base_test {
+        ($k:expr) => {
+            paste! {
+                const [< K $k >] : u32 = $k;
+                println!("Generated base test for {}", [<K $k>]);
+                for i in 1..5000_u32 {
+                    let r = radix(i, [<K $k> ] as u8);
+                    let b = Base::<[<K $k>]>::from(i);
+                    assert_eq!(r.to_string(), b.to_string());
+                }
+            }
+        };
     }
+    generate_base_test!(2);
+    generate_base_test!(3);
+    generate_base_test!(4);
+    generate_base_test!(5);
+    generate_base_test!(6);
+    generate_base_test!(7);
+    generate_base_test!(8);
+    generate_base_test!(9);
+    generate_base_test!(10);
 }
 #[test]
 fn check_octal() {
@@ -76,7 +92,11 @@ fn check_base3() {
     assert_eq!(
         Base {
             number: 11,
-            exponents: vec![(Multiplier(1), Power(2)), (Multiplier(0), Power(1)) ,(Multiplier(2), Power(0))],
+            exponents: vec![
+                (Multiplier(1), Power(2)),
+                (Multiplier(0), Power(1)),
+                (Multiplier(2), Power(0))
+            ],
             reduced: false
         },
         three

@@ -1,5 +1,5 @@
 //! Base<K> is our implementation for a hereditary base notation to be used in computing Goodstein sequences
-use std::{fmt::Display, ops::Mul};
+use std::fmt::Display;
 static DIGITS: &'static str = "0123456789abcdefghijklmnopqrstuvwxyz";
 #[cfg(test)]
 mod tests;
