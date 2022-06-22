@@ -1,4 +1,5 @@
 use super::*;
+#[ignore = "test works, but takes a whopping 2 seconds which is too long"]
 #[test]
 fn check_display_impl() {
     use paste::paste;
@@ -8,7 +9,7 @@ fn check_display_impl() {
             paste! {
                 const [< K $k >] : u32 = $k;
                 println!("Generated base display test for {}", [<K $k>]);
-                for i in 1..5000_u32 {
+                for i in 1..10_000_u32 {
                     let r = radix(i, [<K $k> ] as u8);
                     let b = Base::<[<K $k>]>::from(i);
                     assert_eq!(r.to_string(), b.to_string());
@@ -16,41 +17,43 @@ fn check_display_impl() {
             }
         };
     }
-    generate_base_test!(2);
-    generate_base_test!(3);
-    generate_base_test!(4);
-    generate_base_test!(5);
-    generate_base_test!(6);
-    generate_base_test!(7);
-    generate_base_test!(8);
-    generate_base_test!(9);
-    generate_base_test!(10);
-    generate_base_test!(11);
-    generate_base_test!(12);
-    generate_base_test!(13);
-    generate_base_test!(14);
-    generate_base_test!(15);
-    generate_base_test!(16);
-    generate_base_test!(17);
-    generate_base_test!(18);
-    generate_base_test!(19);
-    generate_base_test!(20);
-    generate_base_test!(21);
-    generate_base_test!(22);
-    generate_base_test!(23);
-    generate_base_test!(24);
-    generate_base_test!(25);
-    generate_base_test!(26);
-    generate_base_test!(27);
-    generate_base_test!(28);
-    generate_base_test!(29);
-    generate_base_test!(30);
-    generate_base_test!(31);
-    generate_base_test!(32);
-    generate_base_test!(33);
-    generate_base_test!(34);
-    generate_base_test!(35);
-    generate_base_test!(36);
+    {
+        generate_base_test!(2);
+        generate_base_test!(3);
+        generate_base_test!(4);
+        generate_base_test!(5);
+        generate_base_test!(6);
+        generate_base_test!(7);
+        generate_base_test!(8);
+        generate_base_test!(9);
+        generate_base_test!(10);
+        generate_base_test!(11);
+        generate_base_test!(12);
+        generate_base_test!(13);
+        generate_base_test!(14);
+        generate_base_test!(15);
+        generate_base_test!(16);
+        generate_base_test!(17);
+        generate_base_test!(18);
+        generate_base_test!(19);
+        generate_base_test!(20);
+        generate_base_test!(21);
+        generate_base_test!(22);
+        generate_base_test!(23);
+        generate_base_test!(24);
+        generate_base_test!(25);
+        generate_base_test!(26);
+        generate_base_test!(27);
+        generate_base_test!(28);
+        generate_base_test!(29);
+        generate_base_test!(30);
+        generate_base_test!(31);
+        generate_base_test!(32);
+        generate_base_test!(33);
+        generate_base_test!(34);
+        generate_base_test!(35);
+        generate_base_test!(36);
+    }
 }
 #[test]
 fn check_octal() {
