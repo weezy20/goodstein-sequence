@@ -1,3 +1,5 @@
+use crate::goostein_sequence::GoodsteinSeq;
+
 use super::*;
 #[ignore = "test works, but takes a whopping 2 seconds which is too long"]
 #[test]
@@ -70,7 +72,7 @@ fn check_octal() {
                 // (Multiplier(0), Power(1)), // This should not be here
                 (Multiplier(2), Power(0))
             ],
-            reduced: false
+            reduced: true
         },
         eighteen
     );
@@ -83,7 +85,7 @@ fn check_octal() {
                 (Multiplier(0), Power(1)), // This should be here but our previous rule cuts this out so we fixed that in line 80
                 (Multiplier(5), Power(0))
             ],
-            reduced: false
+            reduced: true
         },
         _69
     );
@@ -92,7 +94,7 @@ fn check_octal() {
         Base {
             number: 10,
             exponents: vec![(Multiplier(1), Power(1)), (Multiplier(2), Power(0))],
-            reduced: false
+            reduced: true
         },
         _10
     );
@@ -101,7 +103,7 @@ fn check_octal() {
         Base {
             number: 8,
             exponents: vec![(Multiplier(1), Power(1))],
-            reduced: false
+            reduced: true
         },
         _8
     );
@@ -110,7 +112,7 @@ fn check_octal() {
         Base {
             number: 64,
             exponents: vec![(Multiplier(1), Power(2))],
-            reduced: false
+            reduced: true
         },
         _64
     )
@@ -126,7 +128,7 @@ fn check_base3() {
                 (Multiplier(0), Power(1)),
                 (Multiplier(2), Power(0))
             ],
-            reduced: false
+            reduced: true
         },
         three
     );
@@ -175,4 +177,19 @@ fn is_power_of_test() {
     assert_eq!(res, Some((false, 2)));
     let res = is_power_of(2, 3);
     assert_eq!(res, None);
+}
+#[test]
+fn check_reduced() {
+    // 100 = 2^6 + 2^5 + 2^2 therefore shouldn't be reduced on first pass
+    let _100 = Base::<2>::from(100_u32);
+    assert!(!_100.reduced);
+    let _4 = Base::<2>::from(4);
+    assert!(!_4.reduced); // 4 can be represented as 2^2 which on base bump will become 3^3
+    let _3 = Base::<2>::from(3);
+    assert!(_3.reduced); // 3 as 2^1 + 2^0 such that exponents 0 and 1 are already < 2. There's nothing to bump
+}
+#[test]
+fn generate_goodstein_seq() {
+    let _100 = Base::<2>::from(100_u32);
+    assert_eq!(_100.compute(), Into::<GoodsteinSeq<2>>::into(_100).get_compute());
 }

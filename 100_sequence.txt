@@ -1,0 +1,229 @@
+
+cargo test --package goodstein_seq --lib -- tests::generate_goodstein_seq --exact --nocapture
+GoodsteinSeq {
+    base_number: Base {
+        number: 100,
+        exponents: [
+            (
+                Multiplier(
+                    1,
+                ),
+                Power(
+                    6,
+                ),
+            ),
+            (
+                Multiplier(
+                    1,
+                ),
+                Power(
+                    5,
+                ),
+            ),
+            (
+                Multiplier(
+                    0,
+                ),
+                Power(
+                    4,
+                ),
+            ),
+            (
+                Multiplier(
+                    0,
+                ),
+                Power(
+                    3,
+                ),
+            ),
+            (
+                Multiplier(
+                    1,
+                ),
+                Power(
+                    2,
+                ),
+            ),
+            (
+                Multiplier(
+                    0,
+                ),
+                Power(
+                    1,
+                ),
+            ),
+            (
+                Multiplier(
+                    0,
+                ),
+                Power(
+                    0,
+                ),
+            ),
+        ],
+        reduced: false,
+    },
+    g_exponents: [
+        (
+            Multiplier(
+                1,
+            ),
+            NonReduced(
+                6,
+                false,
+                Base {
+                    number: 6,
+                    exponents: [
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                2,
+                            ),
+                        ),
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                1,
+                            ),
+                        ),
+                        (
+                            Multiplier(
+                                0,
+                            ),
+                            Power(
+                                0,
+                            ),
+                        ),
+                    ],
+                    reduced: false,
+                },
+            ),
+        ),
+        (
+            Multiplier(
+                1,
+            ),
+            NonReduced(
+                5,
+                false,
+                Base {
+                    number: 5,
+                    exponents: [
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                2,
+                            ),
+                        ),
+                        (
+                            Multiplier(
+                                0,
+                            ),
+                            Power(
+                                1,
+                            ),
+                        ),
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                0,
+                            ),
+                        ),
+                    ],
+                    reduced: false,
+                },
+            ),
+        ),
+        (
+            Multiplier(
+                0,
+            ),
+            NonReduced(
+                4,
+                false,
+                Base {
+                    number: 4,
+                    exponents: [
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                2,
+                            ),
+                        ),
+                    ],
+                    reduced: false,
+                },
+            ),
+        ),
+        (
+            Multiplier(
+                0,
+            ),
+            NonReduced(
+                3,
+                true,
+                Base {
+                    number: 3,
+                    exponents: [
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                1,
+                            ),
+                        ),
+                        (
+                            Multiplier(
+                                1,
+                            ),
+                            Power(
+                                0,
+                            ),
+                        ),
+                    ],
+                    reduced: true,
+                },
+            ),
+        ),
+        (
+            Multiplier(
+                1,
+            ),
+            Reduced(
+                2,
+            ),
+        ),
+        (
+            Multiplier(
+                0,
+            ),
+            Reduced(
+                1,
+            ),
+        ),
+        (
+            Multiplier(
+                0,
+            ),
+            Reduced(
+                0,
+            ),
+        ),
+    ],
+    reduced: false,
+}
+test tests::generate_goodstein_seq ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
