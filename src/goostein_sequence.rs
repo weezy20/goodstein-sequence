@@ -1,5 +1,5 @@
 //! We follow the design of `Base<K>` but deviate on important grounds such as replacing Power(UnsignedInteger) with Power(Base<K>)
-use crate::{check_reduced, Base, Multiplier, UnsignedInteger};
+use crate::{Base, Multiplier, UnsignedInteger};
 
 /// Generate a Goodstein sequence from a `Base<K>` number such that the following operations are defined
 /// 1. Bump base of all nested powers such that `GoosteinSeq<K>` turns to `GoosteinSeq<K+1>`
@@ -54,19 +54,23 @@ impl<const K: UnsignedInteger> std::fmt::Debug for GPow<K> {
         }
     }
 }
-
-impl<const K: UnsignedInteger> GoodsteinSeq<K> {
-    /// Expands the non-reduced Goostein sequence which is equivalent to a newly constructed Base<K>
-    /// Into it's goodstein sequence
-    pub fn expand(&mut self) {
+impl<const K: UnsignedInteger> std::fmt::Display for GoodsteinSeq<K> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }
+
 impl<const K: UnsignedInteger> GoodsteinSeq<K> {
     pub fn get_num(&self) -> UnsignedInteger {
         self.base_number.number
     }
     pub fn get_compute(&self) -> UnsignedInteger {
         self.base_number.compute()
+    }
+    pub fn bump_base(&mut self) {
+        todo!()
+    }
+    pub fn substract_one(&mut self) {
+        todo!()
     }
 }
