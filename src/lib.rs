@@ -1,4 +1,5 @@
 //! Base<K> is our implementation for a hereditary base notation to be used in computing Goodstein sequences
+#![feature(generic_const_exprs)]
 mod goostein_sequence;
 use std::fmt::Display;
 static DIGITS: &'static str = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -7,8 +8,10 @@ pub(crate) type UnsignedInteger = u32;
 mod tests;
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Multiplier(UnsignedInteger);
+
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Power(UnsignedInteger);
+
 #[derive(Debug, Default, Clone, PartialEq)]
 /// Hereditary base K notation
 /// Any number `N` can be represented as a `Sum(A_i.K^i)`
@@ -29,6 +32,19 @@ impl<const K: UnsignedInteger> Base<K> {
             .fold(0, |acc, &x| acc + x.0 .0 * K.pow(x.1 .0));
         assert_eq!(s, self.number);
         s
+    }
+    /// Only base bump the power if power == K
+    pub fn base_bump(b: Base<K>) -> Base<{ K + 1 }> {
+        let exponents = b
+            .exponents
+            .iter()
+            .map(|&(m, p)| if K == p.0 { (m, Power(K + 1)) } else { (m, p) })
+            .collect();
+        Base::<{ K + 1 }> {
+            number: b.number,
+            exponents,
+            reduced: b.reduced,
+        }
     }
 }
 
@@ -115,14 +131,19 @@ impl<const K: UnsignedInteger> From<UnsignedInteger> for Base<K> {
 /// Suppose we write a nonnegative integer n as a sum of powers of k,
 /// then we write the k exponents themselves as similar sums of powers,
 /// repeating this process until we get all topmost exponents less than k.
-fn check_reduced<const K: UnsignedInteger>(exponent_list: &[(Multiplier, Power)]) -> bool {
+fn check_reduced<const K: UnsignedInteger>(
+    exponent_list: &[(Multiplier, Power)],
+) -> bool {
     exponent_list.iter().all(|(_, p)| p.0 < K)
 }
 
 /// Returns Some(true, exponent) if `number` is a perfect power of a given `base`
 /// else Some(false, exponent) where `number - base.pow(exponent) < base`
 /// None is returned if `number < base`
-pub fn is_power_of(number: UnsignedInteger, base: UnsignedInteger) -> Option<(bool, UnsignedInteger)> {
+pub fn is_power_of(
+    number: UnsignedInteger,
+    base: UnsignedInteger,
+) -> Option<(bool, UnsignedInteger)> {
     if number < base {
         return None;
     }

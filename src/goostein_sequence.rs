@@ -4,6 +4,7 @@ use crate::{Base, Multiplier, UnsignedInteger};
 /// Generate a Goodstein sequence from a `Base<K>` number such that the following operations are defined
 /// 1. Bump base of all nested powers such that `GoosteinSeq<K>` turns to `GoosteinSeq<K+1>`
 /// 2. Substract one from the result of `compute` on `GoodsteinSeq<K>`
+/// Repeat operations 1 and 2 alternatively until the sequence converges to 0
 #[derive(Debug, PartialEq, Clone)]
 pub struct GoodsteinSeq<const K: UnsignedInteger> {
     pub base_number: Base<K>,
