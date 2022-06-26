@@ -1,4 +1,6 @@
 //! We follow the design of `Base<K>` but deviate on important grounds such as replacing Power(UnsignedInteger) with Power(Base<K>)
+use std::vec;
+
 use crate::{Base, Multiplier, UnsignedInteger};
 
 /// Generate a Goodstein sequence from a `Base<K>` number such that the following operations are defined
@@ -61,15 +63,31 @@ impl<const K: UnsignedInteger> std::fmt::Display for GoodsteinSeq<K> {
     }
 }
 
-impl<const K: UnsignedInteger> GoodsteinSeq<K> {
+impl<const K: UnsignedInteger> GoodsteinSeq<K>
+where
+    GoodsteinSeq<{ K + 1 }>: Sized,
+{
     pub fn get_num(&self) -> UnsignedInteger {
         self.base_number.number
     }
     pub fn get_compute(&self) -> UnsignedInteger {
         self.base_number.compute()
     }
-    pub fn bump_base(&mut self) {
-        todo!()
+    pub fn bump_base(self) -> GoodsteinSeq<{ K + 1 }> {
+        let bumped_number = Base::<K>::base_bump(self.base_number);
+        let bumped_g_exponents: Vec<(Multiplier, GPow<{ K + 1 }>)> = self
+            .g_exponents
+            .into_iter()
+            .map(|(m, p)| match p {
+                GPow::NonReduced(x) => (m, GPow::NonReduced(Base::<K>::base_bump(x))),
+                GPow::Reduced(x) => (m, GPow::<{ K + 1 }>::Reduced(x)),
+            })
+            .collect();
+        GoodsteinSeq {
+            base_number: bumped_number,
+            g_exponents: bumped_g_exponents,
+            reduced: self.reduced,
+        }
     }
     pub fn substract_one(&mut self) {
         todo!()
